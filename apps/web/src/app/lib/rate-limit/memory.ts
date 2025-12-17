@@ -1,7 +1,7 @@
 export class MemoryRateLimiter {
   private limitMap = new Map<string, { count: number; resetTime: number }>();
   constructor(
-    private maxRequests: number = 3,
+    private maxRequests: number = 10,
     private windowMs: number = 60000
   ) {}
 
@@ -28,4 +28,4 @@ export class MemoryRateLimiter {
   }
 }
 
-export const memoryChatLimiter = new MemoryRateLimiter(3, 60000);
+export const memoryChatLimiter = new MemoryRateLimiter(10, 60000);
