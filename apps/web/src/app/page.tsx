@@ -128,7 +128,6 @@ function YourMainContent({ themeColor }: { themeColor: string }) {
         </div>
         {state.proverbs?.length === 0 && (
           <p className="text-center text-white/80 italic my-8">
-            No proverbs yet. Ask the assistant to add some!
           </p>
         )}
       </div>
