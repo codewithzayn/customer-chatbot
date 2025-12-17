@@ -73,18 +73,15 @@ export function buildContextString(
     .join("\n\n---\n\n");
 }
 
-/**
- * Cache a query-response pair for future use
- */
+
 export async function cacheQueryResponse(
   query: string,
+  queryEmbedding: number[],
   response: string
 ): Promise<void> {
   try {
-    const queryEmbedding = await generateEmbedding(query);
     await storeInSemanticCache(query, queryEmbedding, response, 3600); // 1 hour TTL
   } catch (error) {
     console.error("Failed to cache response:", error);
-    // Don't throw - caching failure shouldn't break the request
   }
 }
