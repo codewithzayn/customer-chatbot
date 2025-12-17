@@ -5,9 +5,24 @@ import {
 } from "../../../lib/rag/orchestrator";
 import { searchSemanticCache } from "../../../lib/redis/semantic-cache";
 import { generateEmbedding } from "../../../lib/openai/client";
+import { cacheQueryResponse } from "../../../lib/rag/orchestrator";
+import { chatRateLimiter } from "../../../lib/rate-limit";
 
 export async function POST(req: NextRequest) {
   try {
+    const ip =
+      req.headers.get("x-forwarded-for") ||
+      req.headers.get("x-real-ip") ||
+      "anonymous";
+    const allowed = await chatRateLimiter.check(ip);
+
+    if (!allowed) {
+      return NextResponse.json(
+        { error: "Too many requests. Please try again later." },
+        { status: 429 }
+      );
+    }
+
     const { query, topK = 3, similarityThreshold = 0.7 } = await req.json();
 
     if (!query || typeof query !== "string") {
@@ -17,7 +32,7 @@ export async function POST(req: NextRequest) {
       );
     }
     const queryEmbedding = await generateEmbedding(query);
-    const cachedResponse = await searchSemanticCache(queryEmbedding, 0.88);
+    const cachedResponse = await searchSemanticCache(queryEmbedding, 0.7);
     if (cachedResponse) {
       console.log("[Knowledge Search] Cache HIT");
       return NextResponse.json({
@@ -37,7 +52,7 @@ export async function POST(req: NextRequest) {
 
     // Step 4: Build context string
     const contextString = buildContextString(ragContext.relevantDocs);
-
+    await cacheQueryResponse(query, queryEmbedding, contextString);
     return NextResponse.json({
       success: true,
       cached: false,

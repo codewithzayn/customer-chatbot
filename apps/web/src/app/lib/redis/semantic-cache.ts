@@ -34,7 +34,7 @@ export interface SemanticCacheEntry {
  * This avoids Redis KEYS and keeps lookups bounded.
  */
 const SEMANTIC_CACHE_HASH = "semantic_cache:v1";
-const MAX_CACHE_ENTRIES = 500; // safety limit
+const MAX_CACHE_ENTRIES = 500;
 
 /**
  * ============================
@@ -62,7 +62,7 @@ function cosineSimilarity(a: number[], b: number[]): number {
  */
 export async function searchSemanticCache(
   queryEmbedding: number[],
-  similarityThreshold = 0.88
+  similarityThreshold = 0.7
 ): Promise<string | null> {
   try {
     const entries = await redis.hgetall(SEMANTIC_CACHE_HASH);
@@ -70,19 +70,20 @@ export async function searchSemanticCache(
     if (!entries || Object.keys(entries).length === 0) {
       return null;
     }
+    let maxSimilarity = 0;
+    let matchedQuery = "";
 
     for (const raw of Object.values(entries)) {
       const entry = JSON.parse(raw) as SemanticCacheEntry;
 
-      const similarity = cosineSimilarity(
-        queryEmbedding,
-        entry.embedding
-      );
+      const similarity = cosineSimilarity(queryEmbedding, entry.embedding);
+      if (similarity > maxSimilarity) {
+        maxSimilarity = similarity;
+        matchedQuery = entry.query;
+      }
 
       if (similarity >= similarityThreshold) {
-        console.log(
-          `[Semantic Cache HIT] similarity=${similarity.toFixed(4)}`
-        );
+        console.log(`[Semantic Cache HIT] similarity=${similarity.toFixed(4)}`);
         return entry.response;
       }
     }
@@ -116,11 +117,7 @@ export async function storeInSemanticCache(
     };
 
     // Store entry
-    await redis.hset(
-      SEMANTIC_CACHE_HASH,
-      id,
-      JSON.stringify(entry)
-    );
+    await redis.hset(SEMANTIC_CACHE_HASH, id, JSON.stringify(entry));
 
     // Expire entire hash (sliding TTL)
     await redis.expire(SEMANTIC_CACHE_HASH, ttlSeconds);
@@ -154,13 +151,8 @@ async function evictOldestEntries(count: number) {
     .slice(0, count);
 
   if (sorted.length > 0) {
-    await redis.hdel(
-      SEMANTIC_CACHE_HASH,
-      ...sorted.map(e => e.key)
-    );
+    await redis.hdel(SEMANTIC_CACHE_HASH, ...sorted.map((e) => e.key));
 
-    console.log(
-      `[Semantic Cache] Evicted ${sorted.length} old entries`
-    );
+    console.log(`[Semantic Cache] Evicted ${sorted.length} old entries`);
   }
 }
