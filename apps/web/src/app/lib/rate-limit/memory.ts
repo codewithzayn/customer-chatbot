@@ -1,6 +1,9 @@
 export class MemoryRateLimiter {
   private limitMap = new Map<string, { count: number; resetTime: number }>();
-  constructor(private maxRequests: number = 10, private windowMs: number = 60000) {}
+  constructor(
+    private maxRequests: number = 3,
+    private windowMs: number = 60000
+  ) {}
 
   check(key: string): boolean {
     const now = Date.now();
@@ -25,6 +28,4 @@ export class MemoryRateLimiter {
   }
 }
 
-// Singleton instances for local/dev
-export const memoryUploadLimiter = new MemoryRateLimiter(10, 60000);
-export const memoryChatLimiter = new MemoryRateLimiter(30, 60000);
+export const memoryChatLimiter = new MemoryRateLimiter(3, 60000);

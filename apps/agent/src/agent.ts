@@ -123,10 +123,6 @@ Be helpful, concise, and professional.`,
   // 5.5 Log what tools were called (if any)
   const aiResponse = response as AIMessage;
   if (aiResponse.tool_calls && aiResponse.tool_calls.length > 0) {
-    console.log(
-      "[Agent] Tool calls made:",
-      aiResponse.tool_calls.map((tc) => tc.name)
-    );
   } else {
     console.log("[Agent] No tool calls made - responding directly");
   }

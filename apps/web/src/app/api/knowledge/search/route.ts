@@ -16,13 +16,7 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
-
-    console.log(`[Knowledge Search] Query: "${query}"`);
-
-    // Step 1: Generate embedding
     const queryEmbedding = await generateEmbedding(query);
-
-    // Step 2: Check semantic cache
     const cachedResponse = await searchSemanticCache(queryEmbedding, 0.88);
     if (cachedResponse) {
       console.log("[Knowledge Search] Cache HIT");
@@ -33,9 +27,6 @@ export async function POST(req: NextRequest) {
         documents: [],
       });
     }
-
-    console.log("[Knowledge Search] Cache MISS - searching vector DB");
-
     // Step 3: Vector search in Supabase
     const ragContext = await retrieveContext(
       query,

@@ -7,7 +7,11 @@ const redis = new Redis(redisUrl);
  * Redis-based rate limiter using INCR and TTL
  */
 export class RedisRateLimiter {
-  constructor(private keyPrefix: string, private maxRequests: number = 10, private windowSec: number = 60) {}
+  constructor(
+    private keyPrefix: string,
+    private maxRequests: number = 2,
+    private windowSec: number = 60 // Redis expire() expects seconds, not milliseconds
+  ) {}
 
   async check(key: string): Promise<boolean> {
     const redisKey = `${this.keyPrefix}:${key}`;
@@ -20,5 +24,4 @@ export class RedisRateLimiter {
 }
 
 // Singleton instances for production
-export const redisUploadLimiter = new RedisRateLimiter("upload", 10, 60);
-export const redisChatLimiter = new RedisRateLimiter("chat", 30, 60);
+export const redisChatLimiter = new RedisRateLimiter("chat", 3, 60); // 3 requests per 60 seconds

@@ -3,8 +3,6 @@ import { processPDFDocument, processText } from '../../../lib/rag/pdf-processor'
 
 export async function POST(req: NextRequest) {
   try {
-    // Breakpoint for debugging
-    console.log("Starting document upload request");
 
     // Check Content-Type
     const contentType = req.headers.get('content-type') || '';
