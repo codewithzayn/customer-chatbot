@@ -1,8 +1,6 @@
 import { generateEmbedding } from "../openai/client";
 import { searchSimilarDocuments } from "../supabase/client";
-import {
-  storeInSemanticCache,
-} from "../redis/semantic-cache";
+import { storeInSemanticCache } from "../redis/semantic-cache";
 
 /**
  * RAG Orchestrator - Coordinates semantic caching, vector search, and LLM generation
@@ -55,24 +53,19 @@ export async function retrieveContext(
 
 /**
  * Build context string from relevant documents
+ * Returns user-friendly text suitable for direct display
  */
 export function buildContextString(
   docs: Array<{ content: string; similarity: number }>
 ): string {
   if (docs.length === 0) {
-    return "No relevant information found in the knowledge base.";
+    return "I apologize, but I don't have any information about that in my knowledge base.";
   }
 
-  return docs
-    .map(
-      (doc, index) =>
-        `[Document ${index + 1}] (Relevance: ${(doc.similarity * 100).toFixed(
-          1
-        )}%)\n${doc.content}`
-    )
-    .join("\n\n---\n\n");
+  // Return clean, concatenated content without technical markers
+  // If multiple documents, join them naturally
+  return docs.map((doc) => doc.content.trim()).join("\n\n");
 }
-
 
 export async function cacheQueryResponse(
   query: string,

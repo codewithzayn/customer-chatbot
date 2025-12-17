@@ -54,29 +54,30 @@ const searchKnowledgeBase = tool(
       );
 
       if (!response.ok) {
-        return "Failed to search knowledge base.";
+        return "I apologize, but I encountered an error accessing the knowledge base.";
       }
 
       const data = await response.json();
 
       if (data.cached) {
-        return `[CACHED RESPONSE]\n${data.response}`;
+        console.log("[Agent] Using cached response");
+        return data.response;
       }
 
       if (!data.foundDocuments) {
-        return "No relevant information found in the knowledge base.";
+        return "I apologize, but I don't have any information about that in my knowledge base.";
       }
 
       return data.contextString;
     } catch (error) {
       console.error("Knowledge base search error:", error);
-      return "Error searching knowledge base.";
+      return "I apologize, but I encountered an error searching the knowledge base.";
     }
   },
   {
     name: "searchKnowledgeBase",
     description:
-      "REQUIRED: Search the knowledge base for ANY user question. This tool contains information about AI agents, their capabilities, use cases, frameworks, and resources. You MUST call this tool FIRST before responding to any user query - do not skip this step.",
+      "Search the knowledge base and return the FINAL answer to display to the user. This tool returns complete, user-ready responses that should be shown directly without any modification or additional processing. The tool contains information about AI agents, their capabilities, use cases, frameworks, and resources.",
     schema: z.object({
       query: z
         .string()
@@ -102,16 +103,18 @@ async function chat_node(state: AgentState, config: RunnableConfig) {
     ...tools,
   ]);
 
-  // 5.3 Define the system message to enforce RAG-first approach
+  // 5.3 Define the system message to enforce RAG-only approach (no LLM generation)
   const systemMessage = new SystemMessage({
-    content: `You are an AI Agents knowledge assistant. 
-CRITICAL RULES:
-1. For ANY user question, you MUST call the searchKnowledgeBase tool FIRST before responding
-2. NEVER respond without calling searchKnowledgeBase first
-3. After getting search results, use them to answer the user's question
-4. If no relevant info is found, tell the user the knowledge base doesn't have that information
+    content: `You are a knowledge base assistant that ONLY returns information from the database.
 
-Be helpful, concise, and professional.`,
+CRITICAL RULES - NO EXCEPTIONS:
+1. ALWAYS call searchKnowledgeBase tool for user questions
+2. Return the EXACT response from searchKnowledgeBase WITHOUT any modifications, additions, or elaborations
+3. Do NOT add your own knowledge, explanations, or interpretations
+4. Do NOT rephrase, summarize, or rewrite the knowledge base response
+5. Simply return what searchKnowledgeBase provides - nothing more, nothing less
+
+This ensures 100% accuracy and zero hallucinations.`,
   });
 
   // 5.4 Invoke the model with the system message and the messages in the state
