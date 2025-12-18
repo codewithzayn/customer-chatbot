@@ -76,8 +76,10 @@ const searchKnowledgeBase = tool(
   },
   {
     name: "searchKnowledgeBase",
-    description:
-      "Search the knowledge base and return the FINAL answer to display to the user. This tool returns complete, user-ready responses that should be shown directly without any modification or additional processing. The tool contains information about AI agents, their capabilities, use cases, frameworks, and resources.",
+    description: `
+      Search the knowledge base and return RELEVANT CONTEXT.
+      The assistant must use ONLY this context to answer the user.
+`,
     schema: z.object({
       query: z
         .string()
@@ -105,18 +107,17 @@ async function chat_node(state: AgentState, config: RunnableConfig) {
 
   // 5.3 Define the system message to enforce RAG-only approach (no LLM generation)
   const systemMessage = new SystemMessage({
-    content: `You are a knowledge base assistant that ONLY returns information from the database.
-    When answering queries, prioritize the MOST relevant information from the knowledge base. 
-    Keep responses concise and focused on the best match
+    content: `
+You are a Retrieval-Augmented AI assistant.
+RULES:
+1. You MUST call searchKnowledgeBase for every user question
+2. You MUST answer using ONLY the information returned by searchKnowledgeBase
+3. You MAY explain, summarize, and structure the answer for clarity
+4. You MUST NOT introduce any information that is not present in the retrieved context
+5. If the context is insufficient, say you do not have enough information
 
-CRITICAL RULES - NO EXCEPTIONS:
-1. ALWAYS call searchKnowledgeBase tool for user questions
-2. Return the EXACT response from searchKnowledgeBase WITHOUT any modifications, additions, or elaborations
-3. Do NOT add your own knowledge, explanations, or interpretations
-4. Do NOT rephrase, summarize, or rewrite the knowledge base response
-5. Simply return what searchKnowledgeBase provides - nothing more, nothing less
-
-This ensures 100% accuracy and zero hallucinations.`,
+Your goal is to provide clear, helpful explanations grounded strictly in retrieved knowledge.
+`,
   });
 
   // 5.4 Invoke the model with the system message and the messages in the state

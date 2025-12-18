@@ -1,7 +1,7 @@
 import Redis from "ioredis";
 import crypto from "crypto";
 
- // Redis Client (Server Only)
+// Redis Client (Server Only)
 
 const redisUrl = process.env.REDIS_URL ?? "redis://localhost:6379";
 
@@ -10,7 +10,7 @@ export const redis = new Redis(redisUrl, {
   enableReadyCheck: true,
 });
 
- // Types
+// Types
 export interface SemanticCacheEntry {
   query: string;
   embedding: number[];
@@ -18,12 +18,12 @@ export interface SemanticCacheEntry {
   timestamp: number;
 }
 
- // We store all entries in ONE HASH.
+// We store all entries in ONE HASH.
 
 const SEMANTIC_CACHE_HASH = "semantic_cache:v1";
 const MAX_CACHE_ENTRIES = 500;
 
- // Math Utils
+// Math Utils
 function cosineSimilarity(a: number[], b: number[]): number {
   let dot = 0;
   let normA = 0;
@@ -38,11 +38,11 @@ function cosineSimilarity(a: number[], b: number[]): number {
   return dot / (Math.sqrt(normA) * Math.sqrt(normB));
 }
 
- // Search Semantic Cache
+// Search Semantic Cache
 
 export async function searchSemanticCache(
   queryEmbedding: number[],
-  similarityThreshold = 0.7
+  similarityThreshold = 0.55
 ): Promise<string | null> {
   try {
     const entries = await redis.hgetall(SEMANTIC_CACHE_HASH);

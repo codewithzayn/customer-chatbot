@@ -2,9 +2,7 @@ import { generateEmbedding } from "../openai/client";
 import { searchSimilarDocuments } from "../supabase/client";
 import { storeInSemanticCache } from "../redis/semantic-cache";
 
-/**
- * RAG Orchestrator - Coordinates semantic caching, vector search, and LLM generation
- */
+// RAG Orchestrator - Coordinates semantic caching, vector search, and LLM generation
 
 export interface RAGContext {
   query: string;
@@ -15,13 +13,11 @@ export interface RAGContext {
   cacheHit: boolean;
 }
 
-/**
- * Retrieve relevant context for a query using RAG pipeline
- */
+// Retrieve relevant context for a query using RAG pipeline
 export async function retrieveContext(
   query: string,
-  topK: number = 3,
-  similarityThreshold: number = 0.7,
+  topK: number = 1,
+  similarityThreshold: number = 0.55,
   existingEmbedding?: number[]
 ): Promise<RAGContext> {
   try {
@@ -51,10 +47,7 @@ export async function retrieveContext(
   }
 }
 
-/**
- * Build context string from relevant documents
- * Returns user-friendly text suitable for direct display
- */
+// Build context string from relevant documents
 export function buildContextString(
   docs: Array<{ content: string; similarity: number }>
 ): string {
@@ -62,7 +55,6 @@ export function buildContextString(
     return "I apologize, but I don't have any information about that in my knowledge base.";
   }
 
-  // Return clean, concatenated content without technical markers
   // If multiple documents, join them naturally
   return docs.map((doc) => doc.content.trim()).join("\n\n");
 }
