@@ -5,7 +5,7 @@ export class MemoryRateLimiter {
     private windowMs: number = 60000
   ) {}
 
-  check(key: string): boolean {
+  async check(key: string): Promise<boolean> {
     const now = Date.now();
     const record = this.limitMap.get(key);
 
