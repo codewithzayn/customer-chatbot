@@ -106,6 +106,8 @@ async function chat_node(state: AgentState, config: RunnableConfig) {
   // 5.3 Define the system message to enforce RAG-only approach (no LLM generation)
   const systemMessage = new SystemMessage({
     content: `You are a knowledge base assistant that ONLY returns information from the database.
+    When answering queries, prioritize the MOST relevant information from the knowledge base. 
+    Keep responses concise and focused on the best match
 
 CRITICAL RULES - NO EXCEPTIONS:
 1. ALWAYS call searchKnowledgeBase tool for user questions

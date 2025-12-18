@@ -12,8 +12,7 @@ CREATE TABLE IF NOT EXISTS documents (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
-
--- HNSW index for vector similarity search
+-- HNSW index for vector similarity search (best for RAG)
 CREATE INDEX IF NOT EXISTS documents_embedding_idx 
 ON documents 
 USING hnsw (embedding vector_cosine_ops)
@@ -23,8 +22,6 @@ WITH (m = 16, ef_construction = 64);
 CREATE INDEX IF NOT EXISTS documents_source_hash_idx 
 ON documents(source_hash);
 
--- Drop old match_documents function (with match_threshold parameter)
-DROP FUNCTION IF EXISTS match_documents(vector, double precision, int);
 
 -- match_documents function (Top-K retrieval)
 CREATE OR REPLACE FUNCTION match_documents(
@@ -43,17 +40,18 @@ AS $$
 BEGIN
   RETURN QUERY
   SELECT
-    documents.id,
-    documents.content,
-    documents.metadata,
-    1 - (documents.embedding <=> query_embedding) > match_threshold
-  FROM documents
-  ORDER BY documents.embedding <=> query_embedding
+    d.id,
+    d.content,
+    d.metadata,
+    1 - (d.embedding <=> query_embedding) AS similarity
+  FROM documents d
+  WHERE 1 - (d.embedding <=> query_embedding) >= match_threshold
+  ORDER BY d.embedding <=> query_embedding
   LIMIT match_count;
 END;
 $$;
 
--- Trigger to update updated_at column
+-- Trigger to update updated_at automatically
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
 BEGIN
