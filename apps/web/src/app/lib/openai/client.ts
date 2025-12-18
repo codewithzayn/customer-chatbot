@@ -10,9 +10,7 @@ export const openai = new OpenAI({
   apiKey,
 });
 
-/**
- * Generate embeddings for text using OpenAI
- */
+ // Generate embeddings for text using OpenAI
 export async function generateEmbedding(text: string): Promise<number[]> {
   try {
     const response = await openai.embeddings.create({
@@ -28,9 +26,8 @@ export async function generateEmbedding(text: string): Promise<number[]> {
   }
 }
 
-/**
- * Generate embeddings for multiple texts in batch
- */
+ // Generate embeddings for multiple texts in batch
+
 export async function generateBatchEmbeddings(
   texts: string[]
 ): Promise<number[][]> {

@@ -3,9 +3,7 @@ import Redis from "ioredis";
 const redisUrl = process.env.REDIS_URL ?? "redis://localhost:6379";
 const redis = new Redis(redisUrl);
 
-/**
- * Redis-based rate limiter
- */
+// Redis-based rate limiter
 export class RedisRateLimiter {
   constructor(
     private keyPrefix: string,

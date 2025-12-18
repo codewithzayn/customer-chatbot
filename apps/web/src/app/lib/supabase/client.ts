@@ -1,7 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 
 // Supabase client with service role key (server-side only)
-// NEVER expose this to the frontend
 const supabaseUrl = process.env.SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
@@ -35,9 +34,7 @@ export interface SearchResult {
   similarity: number;
 }
 
-/**
- * Insert a document with its embedding into Supabase
- */
+// Insert a document with its embedding into Supabase
 export async function insertDocument(
   content: string,
   embedding: number[],
@@ -63,18 +60,16 @@ export async function insertDocument(
   return data;
 }
 
-/**
- * Search for similar documents using vector similarity
- */
+// Search for similar documents using vector similarity
 export async function searchSimilarDocuments(
   queryEmbedding: number[],
   matchThreshold: number = 0.7,
-  matchCount: number = 5
+  topK: number = 1
 ): Promise<SearchResult[]> {
   const { data, error } = await supabase.rpc("match_documents", {
     query_embedding: queryEmbedding,
     match_threshold: matchThreshold,
-    match_count: matchCount,
+    match_count: topK,
   });
 
   if (error) {
@@ -84,10 +79,8 @@ export async function searchSimilarDocuments(
   return data || [];
 }
 
+// Check if a document with the given content hash already exists
 
-/**
- * Check if a document with the given content hash already exists
- */
 export async function checkDocumentExists(hash: string): Promise<boolean> {
   const { data, error } = await supabase
     .from("documents")
