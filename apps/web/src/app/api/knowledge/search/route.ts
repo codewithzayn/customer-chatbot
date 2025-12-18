@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { query, topK = 3, similarityThreshold = 0.7 } = await req.json();
+    const { query, topK = 1, similarityThreshold = 0.55 } = await req.json();
 
     if (!query || typeof query !== "string") {
       return NextResponse.json(
@@ -32,7 +32,10 @@ export async function POST(req: NextRequest) {
       );
     }
     const queryEmbedding = await generateEmbedding(query);
-    const cachedResponse = await searchSemanticCache(queryEmbedding, 0.7);
+    const cachedResponse = await searchSemanticCache(
+      queryEmbedding,
+      similarityThreshold
+    );
     if (cachedResponse) {
       console.log("[Knowledge Search] Cache HIT");
       return NextResponse.json({
@@ -52,7 +55,9 @@ export async function POST(req: NextRequest) {
 
     // Step 4: Build context string
     const contextString = buildContextString(ragContext.relevantDocs);
-    await cacheQueryResponse(query, queryEmbedding, contextString);
+    if (ragContext.relevantDocs.length > 0) {
+      await cacheQueryResponse(query, queryEmbedding, contextString);
+    }
     return NextResponse.json({
       success: true,
       cached: false,

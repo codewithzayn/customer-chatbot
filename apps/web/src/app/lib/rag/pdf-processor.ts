@@ -36,7 +36,6 @@ export async function chunkText(
   const splitter = new RecursiveCharacterTextSplitter({
     chunkSize,
     chunkOverlap,
-    separators: ["\n\n", "\n", ". ", " "],
   });
   return splitter.splitText(text);
 }
