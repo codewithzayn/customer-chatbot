@@ -16,8 +16,10 @@ export interface RAGContext {
 // Retrieve relevant context for a query using RAG pipeline
 export async function retrieveContext(
   query: string,
-  topK: number = 1,
-  similarityThreshold: number = 0.55,
+  topK: number = parseInt(process.env.RAG_TOP_K || "3"),
+  similarityThreshold: number = parseFloat(
+    process.env.RAG_SIMILARITY_THRESHOLD || "0.55"
+  ),
   existingEmbedding?: number[]
 ): Promise<RAGContext> {
   try {

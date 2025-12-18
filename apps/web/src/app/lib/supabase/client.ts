@@ -63,8 +63,10 @@ export async function insertDocument(
 // Search for similar documents using vector similarity
 export async function searchSimilarDocuments(
   queryEmbedding: number[],
-  matchThreshold: number = 0.55,
-  topK: number = 1
+  matchThreshold: number = parseFloat(
+    process.env.RAG_SIMILARITY_THRESHOLD || "0.55"
+  ),
+  topK: number = parseInt(process.env.RAG_TOP_K || "3")
 ): Promise<SearchResult[]> {
   const { data, error } = await supabase.rpc("match_documents", {
     query_embedding: queryEmbedding,

@@ -45,7 +45,8 @@ const searchKnowledgeBase = tool(
   async (args) => {
     try {
       const response = await fetch(
-        "http://localhost:3000/api/knowledge/search",
+        process.env.KNOWLEDGE_API_URL ||
+          "http://localhost:3000/api/knowledge/search",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -105,8 +106,8 @@ async function chat_node(state: AgentState, config: RunnableConfig) {
     ...tools,
   ]);
 
-const systemMessage = new SystemMessage({
-  content: `You are a knowledge assistant powered by Retrieval-Augmented Generation (RAG).
+  const systemMessage = new SystemMessage({
+    content: `You are a knowledge assistant powered by Retrieval-Augmented Generation (RAG).
 
 OBJECTIVE:
 Provide accurate, concise, and professional responses grounded strictly in the available knowledge base.
@@ -133,7 +134,7 @@ RESPONSE STYLE:
 - Clear, professional, and concise.
 - Avoid speculation or unnecessary verbosity.
 - Maintain a neutral, factual tone at all times.`,
-});
+  });
 
   // 5.4 Limit conversation history to save tokens (keep last 5 messages)
   const recentMessages = state.messages.slice(-5);

@@ -23,7 +23,13 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { query, topK = 1, similarityThreshold = 0.55 } = await req.json();
+    const {
+      query,
+      topK = parseInt(process.env.RAG_TOP_K || "3"),
+      similarityThreshold = parseFloat(
+        process.env.RAG_SIMILARITY_THRESHOLD || "0.55"
+      ),
+    } = await req.json();
 
     if (!query || typeof query !== "string") {
       return NextResponse.json(
