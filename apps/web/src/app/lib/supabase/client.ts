@@ -66,7 +66,7 @@ export async function searchSimilarDocuments(
   matchThreshold: number = parseFloat(
     process.env.RAG_SIMILARITY_THRESHOLD || "0.55"
   ),
-  topK: number = parseInt(process.env.RAG_TOP_K || "3")
+  topK: number = parseInt(process.env.RAG_TOP_K || "5")
 ): Promise<SearchResult[]> {
   const { data, error } = await supabase.rpc("match_documents", {
     query_embedding: queryEmbedding,

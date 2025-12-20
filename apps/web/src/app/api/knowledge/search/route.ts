@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
 
     const {
       query,
-      topK = parseInt(process.env.RAG_TOP_K || "3"),
+      topK = parseInt(process.env.RAG_TOP_K || "5"),
       similarityThreshold = parseFloat(
         process.env.RAG_SIMILARITY_THRESHOLD || "0.55"
       ),

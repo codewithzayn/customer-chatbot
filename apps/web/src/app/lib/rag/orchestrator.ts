@@ -16,7 +16,7 @@ export interface RAGContext {
 // Retrieve relevant context for a query using RAG pipeline
 export async function retrieveContext(
   query: string,
-  topK: number = parseInt(process.env.RAG_TOP_K || "3"),
+  topK: number = parseInt(process.env.RAG_TOP_K || "5"),
   similarityThreshold: number = parseFloat(
     process.env.RAG_SIMILARITY_THRESHOLD || "0.55"
   ),
