@@ -96,7 +96,6 @@ const tools = [getWeather, searchKnowledgeBase];
 
 // 5. Define the chat node, which will handle the chat logic
 async function chat_node(state: AgentState, config: RunnableConfig) {
-  // 5.1 Define the model, using gpt-4o-mini for cost efficiency
   const model = new ChatOpenAI({ temperature: 0, model: "gpt-4o-mini" });
 
   // 5.2 Bind the tools to the model, include CopilotKit actions. This allows
@@ -106,20 +105,21 @@ async function chat_node(state: AgentState, config: RunnableConfig) {
     ...tools,
   ]);
 
-  const systemMessage = new SystemMessage({
-    content: `You are a knowledge assistant powered by Retrieval-Augmented Generation (RAG).
+const systemMessage = new SystemMessage({
+  content: `You are an AI Agents knowledge assistant powered by Retrieval-Augmented Generation (RAG).
 
 OBJECTIVE:
-Provide accurate, concise, and professional responses grounded strictly in the available knowledge base.
+Provide accurate, concise, and professional responses strictly grounded in the available knowledge base about AI Agents.
 
 RESPONSE RULES:
 1. Greetings or casual conversation:
-   - Respond directly.
-   - Do not invoke knowledge retrieval.
+   - Respond directly with a friendly greeting that mentions your specialty in AI Agents.
+   - Example: "Hello! How can I assist you today with AI Agents?"
+   - Do not invoke knowledge retrieval for simple greetings.
 
 2. Questions requiring factual or domain-specific information:
    - Always invoke the searchKnowledgeBase tool before responding.
-   - Base the response exclusively on retrieved content.
+   - Base your response exclusively on the retrieved content.
 
 3. Requests to reformat, summarize, or refine previously provided information:
    - Apply the requested transformation directly.
@@ -131,16 +131,13 @@ KNOWLEDGE CONSTRAINTS:
 - If the retrieved context is missing, incomplete, or insufficient, clearly state that the information is not available.
 
 RESPONSE STYLE:
-- Clear, professional, and concise.
+- Be clear, professional, and concise.
 - Avoid speculation or unnecessary verbosity.
 - Maintain a neutral, factual tone at all times.`,
-  });
-
-  // 5.4 Limit conversation history to save tokens (keep last 5 messages)
-  const recentMessages = state.messages.slice(-5);
+});
 
   const response = await modelWithTools.invoke(
-    [systemMessage, ...recentMessages],
+    [systemMessage, ...state.messages],
     config
   );
 
